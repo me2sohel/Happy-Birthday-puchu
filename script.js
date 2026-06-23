@@ -1,5 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    // --- Background Music & Overlay Control ---
+    const startBtn = document.getElementById('start-btn');
+    const overlay = document.getElementById('welcome-overlay');
+    const bgMusic = document.getElementById('bg-music');
+
+    if (startBtn && overlay && bgMusic) {
+        startBtn.addEventListener('click', () => {
+            // 1. Play the background audio safely after user gesture
+            bgMusic.play().catch(error => {
+                console.log("Audio play failed or was blocked:", error);
+            });
+
+            // 2. Smoothly fade out and disable interactions for the overlay
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            
+            // 3. Completely remove the element from the DOM after the 1-second transition finishes
+            setTimeout(() => {
+                overlay.remove();
+            }, 1000); 
+        });
+    }
+
     // --- Live Age Counter ---
     const birthDate = new Date('2006-08-14T00:00:00');
     const countdownElement = document.getElementById('countdown');
@@ -24,7 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (months < 0) { months += 12; years--; }
 
-        countdownElement.innerHTML = `${years}y ${months}m ${days}d <br> ${hours}h ${minutes}m ${seconds}s`;
+        if (countdownElement) {
+            countdownElement.innerHTML = `${years}y ${months}m ${days}d <br> ${hours}h ${minutes}m ${seconds}s`;
+        }
     }
     setInterval(updateAge, 1000);
     updateAge();
@@ -36,10 +60,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Initialize LightGallery ---
-    lightGallery(document.getElementById('lightgallery'), {
-        speed: 500,
-        download: false
-    });
+    const galleryElem = document.getElementById('lightgallery');
+    if (galleryElem) {
+        lightGallery(galleryElem, {
+            speed: 500,
+            download: false
+        });
+    }
 
     // --- Hall of Fame Scroller ---
     const scroller = document.getElementById('hall-of-fame-scroller');
@@ -47,14 +74,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollRightBtn = document.getElementById('scroll-right-btn');
     if (scroller && scrollLeftBtn && scrollRightBtn) {
         const card = scroller.querySelector('.snap-center');
-        const cardWidth = card.offsetWidth + parseInt(getComputedStyle(card.parentElement).gap);
+        if (card) {
+            const cardWidth = card.offsetWidth + parseInt(getComputedStyle(card.parentElement).gap || 0);
 
-        scrollRightBtn.addEventListener('click', () => {
-            scroller.scrollBy({ left: cardWidth, behavior: 'smooth' });
-        });
-        scrollLeftBtn.addEventListener('click', () => {
-            scroller.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-        });
+            scrollRightBtn.addEventListener('click', () => {
+                scroller.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            });
+            scrollLeftBtn.addEventListener('click', () => {
+                scroller.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            });
+        }
     }
 
     // --- Video Uploader ---
@@ -62,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const videoPlayer = document.getElementById('video-player');
     const videoUploadLabel = document.getElementById('video-upload-label');
 
-    if(videoUploadInput && videoPlayer && videoUploadLabel) {
+    if (videoUploadInput && videoPlayer && videoUploadLabel) {
         videoUploadLabel.addEventListener('click', () => {
             videoUploadInput.click();
         });
@@ -78,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
 
     // --- Sakura Petal Animation ---
     const canvas = document.getElementById('sakura-canvas');
@@ -150,4 +178,3 @@ document.addEventListener('DOMContentLoaded', function() {
         animate();
     }
 });
-
