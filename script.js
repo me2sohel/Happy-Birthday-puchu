@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Set the audio source directly to the test link
-            bgMusic.src = "destroyed_in_love.mp3";
+            bgMusic.src = "https://www.image2url.com/r2/default/audio/1782210177809-4537df44-c0fb-4939-baed-a9fc977ccedc.mp3";
             bgMusic.preload = "auto";
             bgMusic.volume = 1.0;
 
