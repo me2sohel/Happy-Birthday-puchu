@@ -3,19 +3,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Background Music & Overlay Control ---
     const startBtn = document.getElementById('start-btn');
     const overlay = document.getElementById('welcome-overlay');
-    const bgMusic = document.getElementById('bg-music');
+    let bgMusic = document.getElementById('bg-music');
 
-    if (startBtn && overlay && bgMusic) {
-        startBtn.addEventListener('click', () => {
-            // 1. Play the background audio safely after user gesture
-            bgMusic.play().catch(error => {
-                console.log("Audio play failed or was blocked:", error);
+    if (startBtn && overlay) {
+        startBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Fallback: If the HTML audio tag is missing, create it dynamically
+            if (!bgMusic) {
+                bgMusic = document.createElement('audio');
+                bgMusic.id = 'bg-music';
+                bgMusic.loop = true;
+                bgMusic.style.display = 'none';
+                document.body.appendChild(bgMusic);
+            }
+
+            // Set the audio source directly to the test link
+            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+            bgMusic.preload = "auto";
+            bgMusic.volume = 1.0;
+
+            // Force play instantly within the user click thread
+            bgMusic.play().then(() => {
+                console.log("Audio playing successfully.");
+            }).catch(error => {
+                console.error("Audio playback failed:", error);
             });
 
-            // 2. Smoothly fade out and disable interactions for the overlay
+            // Smoothly remove the overlay screen
             overlay.classList.add('opacity-0', 'pointer-events-none');
-            
-            // 3. Completely remove the element from the DOM after the 1-second transition finishes
             setTimeout(() => {
                 overlay.remove();
             }, 1000); 
@@ -27,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const countdownElement = document.getElementById('countdown');
 
     function updateAge() {
+        if (!countdownElement) return;
+
         const now = new Date();
 
         let years = now.getFullYear() - birthDate.getFullYear();
@@ -46,22 +65,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (months < 0) { months += 12; years--; }
 
-        if (countdownElement) {
-            countdownElement.innerHTML = `${years}y ${months}m ${days}d <br> ${hours}h ${minutes}m ${seconds}s`;
-        }
+        countdownElement.innerHTML = `${years}y ${months}m ${days}d <br> ${hours}h ${minutes}m ${seconds}s`;
     }
-    setInterval(updateAge, 1000);
-    updateAge();
+    
+    if (countdownElement) {
+        setInterval(updateAge, 1000);
+        updateAge();
+    }
 
     // --- Initialize AOS (Animate on Scroll) ---
-    AOS.init({
-        duration: 800,
-        once: true,
-    });
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
+    }
 
     // --- Initialize LightGallery ---
     const galleryElem = document.getElementById('lightgallery');
-    if (galleryElem) {
+    if (galleryElem && typeof lightGallery !== 'undefined') {
         lightGallery(galleryElem, {
             speed: 500,
             download: false
@@ -72,21 +94,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const scroller = document.getElementById('hall-of-fame-scroller');
     const scrollLeftBtn = document.getElementById('scroll-left-btn');
     const scrollRightBtn = document.getElementById('scroll-right-btn');
+    
     if (scroller && scrollLeftBtn && scrollRightBtn) {
-        const card = scroller.querySelector('.snap-center');
+        const card = scroller.querySelector('.snap-center') || scroller.firstElementChild;
         if (card) {
-            const cardWidth = card.offsetWidth + parseInt(getComputedStyle(card.parentElement).gap || 0);
-
             scrollRightBtn.addEventListener('click', () => {
+                const cardWidth = card.offsetWidth + parseInt(getComputedStyle(scroller).gap || 24);
                 scroller.scrollBy({ left: cardWidth, behavior: 'smooth' });
             });
             scrollLeftBtn.addEventListener('click', () => {
+                const cardWidth = card.offsetWidth + parseInt(getComputedStyle(scroller).gap || 24);
                 scroller.scrollBy({ left: -cardWidth, behavior: 'smooth' });
             });
         }
     }
 
-    // --- Video Uploader ---
+    // --- Video Uploader Safety Checks ---
     const videoUploadInput = document.getElementById('video-upload');
     const videoPlayer = document.getElementById('video-player');
     const videoUploadLabel = document.getElementById('video-upload-label');
