@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Set the audio source directly to the test link
-            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+            bgMusic.src = "destroyed_in_love.mp3";
             bgMusic.preload = "auto";
             bgMusic.volume = 1.0;
 
